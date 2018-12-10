@@ -268,7 +268,6 @@ class Field():
         field2 = np.vstack((arr1, f))
         FIELD[:-1, 1:-1] = field2
         self.score += 2 ** count #スコアを加算
-        return self.score
     
     #積もったブロックを削除
     def delete(self, tag):
@@ -408,7 +407,7 @@ while True:
         field.draw_field(block.tag)
             
         if field.has_filled_line():
-            score = field.delete_lines()
+            field.delete_lines()
             field.draw_field(block.tag)
             field.delete_score(score_id)
             score_id = field.show_score()
