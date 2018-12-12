@@ -38,7 +38,7 @@ class Block():
     #ブロックを描く
     def draw(self):
         index = np.where(self.BLOCK >= 1)
-        for i in np.arange(index[0].size):
+        for i in range(index[0].size):
             x = index[1][i]
             y = index[0][i]
             sq = Square(self.cv, self.color, self.tag)
@@ -122,7 +122,7 @@ class Block():
     #ブロックが重なったかどうか
     def is_overlapped(self):
         index = np.where(self.BLOCK >= 1)
-        for i in np.arange(index[0].size):
+        for i in range(index[0].size):
             x = index[1][i]
             y = index[0][i]
             
@@ -164,7 +164,7 @@ class NextBlock():
         next_blockx = 13
         next_blocky = 7
         index = np.where(self.BLOCK >= 1)
-        for i in np.arange(index[0].size):
+        for i in range(index[0].size):
             x = index[1][i]
             y = index[0][i]
             sq = Square(self.cv, self.color, self.tag)
@@ -193,7 +193,7 @@ class Field():
     def draw_wall_base(self):
         color = 'white'
         #壁
-        for y in np.arange(FIELD.shape[0] - 1):
+        for y in range(FIELD.shape[0] - 1):
             for x in [0, FIELD.shape[1] - 1]:
                 sq = Square(self.cv, color, tag='wall')
                 x1 = (x<<4) + self.offset
@@ -204,7 +204,7 @@ class Field():
          
         #底
         y = FIELD.shape[0] - 1
-        for x in np.arange(FIELD.shape[1]):
+        for x in range(FIELD.shape[1]):
             sq = Square(self.cv, color, tag='wall')
             x1 = (x<<4) + self.offset
             y1 = (y<<4) + self.offset + self.marginy
@@ -226,8 +226,8 @@ class Field():
     def draw_field(self, tag):
         self.delete(tag) #積もったブロックを削除
 
-        for y in np.arange(FIELD.shape[0] - 1):
-            for x in np.arange(1, FIELD.shape[1] - 1):
+        for y in range(FIELD.shape[0] - 1):
+            for x in range(1, FIELD.shape[1] - 1):
                 if FIELD[y, x] >= 1:
                     btype = FIELD[y, x]
                     sq = Square(self.cv, color=self.color_types[btype], tag='load')
@@ -240,7 +240,7 @@ class Field():
     #積もったブロックをフィールドに反映
     def load_block(self, cp_block, posx, posy):
         index = np.where(cp_block >= 1)
-        for i in np.arange(index[0].size):
+        for i in range(index[0].size):
             x = index[1][i]
             y = index[0][i]
             
@@ -434,3 +434,4 @@ while True:
     tk.update_idletasks()
     tk.update()
     time.sleep(0.01)
+
