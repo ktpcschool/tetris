@@ -353,7 +353,7 @@ field.draw_wall_base()
 score_id = field.show_score()
 
 startx = np.random.randint(2, 7) #ブロックが出る横軸上の位置
-starty = -4 #ブロックが出る縦軸上の位置
+starty = -2 #ブロックが出る縦軸上の位置
 
 #ブロックの種類
 blocks = {
