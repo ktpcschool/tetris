@@ -267,7 +267,7 @@ class Field():
         arr1 = np.array([arr] * count)
         field2 = np.vstack((arr1, f))
         FIELD[:-1, 1:-1] = field2
-        self.score += 2 ** count #スコアを加算
+        self.score += count * 2 #スコアを加算
     
     #積もったブロックを削除
     def delete(self, tag):
