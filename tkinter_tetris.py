@@ -127,7 +127,7 @@ class Block():
             y = index[0][i]
             
             if self.posy + y >= 0:
-                if self.posy + y >= FIELD.shape[0] - 1 \
+                if self.posy + y >= FIELD.shape[0] - 3 \
                 or self.posx + x <= 0 \
                 or self.posx + x >= FIELD.shape[1] - 1 \
                 or FIELD[self.posy + y][self.posx + x] >= 1:
@@ -193,7 +193,7 @@ class Field():
     def draw_wall_base(self):
         color = 'white'
         #壁
-        for y in range(FIELD.shape[0] - 1):
+        for y in range(FIELD.shape[0] - 3):
             for x in [0, FIELD.shape[1] - 1]:
                 sq = Square(self.cv, color, tag='wall')
                 x1 = (x<<4) + self.offset
@@ -203,7 +203,7 @@ class Field():
                 sq.draw(x1, y1, x2, y2)
          
         #底
-        y = FIELD.shape[0] - 1
+        y = FIELD.shape[0] - 3
         for x in range(FIELD.shape[1]):
             sq = Square(self.cv, color, tag='wall')
             x1 = (x<<4) + self.offset
@@ -250,9 +250,9 @@ class Field():
         
     #行が全て埋まった段があるかどうか
     def has_filled_line(self):
-        field = FIELD[:-1, 1:-1]
-        f = field[~np.all(field >= 1, axis=1),:]
-        count = field.shape[0] - f.shape[0]
+        field1 = FIELD[2:-1, 1:-1]
+        field2 = field1[~np.all(field1 >= 1, axis=1),:]
+        count = field1.shape[0] - field2.shape[0]
         if count > 0:
             return True
         else:
@@ -260,14 +260,14 @@ class Field():
         
     #行が全て埋まった段を消す
     def delete_lines(self):
-        field1 = FIELD[:-1, 1:-1]
-        f = field1[~np.all(field1 >= 1, axis=1),:]
-        count = field1.shape[0] - f.shape[0]
+        field1 = FIELD[2:-1, 1:-1]
+        field2 = field1[~np.all(field1 >= 1, axis=1),:]
+        count = field1.shape[0] - field2.shape[0]
         arr = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
         arr1 = np.array([arr] * count)
-        field2 = np.vstack((arr1, f))
-        FIELD[:-1, 1:-1] = field2
-        self.score += count * 2 #スコアを加算
+        field3 = np.vstack((arr1, field2))
+        FIELD[2:-1, 1:-1] = field3
+        self.score += count ** 2 #スコアを加算
     
     #積もったブロックを削除
     def delete(self, tag):
@@ -288,7 +288,7 @@ class Field():
         
     #ゲームオーバーかどうか
     def is_game_over(self):
-        return np.sum(FIELD[0, 1:-1]>=1) > 0
+        return np.sum(FIELD[2, 1:-1]>=1) > 0
     
     #GAME OVERの文字を表示
     def show_game_over(self):
@@ -327,6 +327,8 @@ FIELD = np.array(
          [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8],
          [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8],
          [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8],
+         [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8],
+         [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8],
          [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8], 
          [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8], 
          [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8],
@@ -353,7 +355,7 @@ field.draw_wall_base()
 score_id = field.show_score()
 
 startx = np.random.randint(2, 7) #ブロックが出る横軸上の位置
-starty = -2 #ブロックが出る縦軸上の位置
+starty = 0 #ブロックが出る縦軸上の位置
 
 #ブロックの種類
 blocks = {
@@ -434,4 +436,3 @@ while True:
     tk.update_idletasks()
     tk.update()
     time.sleep(0.01)
-
