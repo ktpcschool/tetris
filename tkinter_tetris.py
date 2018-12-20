@@ -16,9 +16,10 @@ class Square():
 
 #ブロックに関するクラス
 class Block():
-    def __init__(self, cv, cell_size, posx, posy, block_type, btype, rot):
+    def __init__(self, cv, cell_size, marginy, posx, posy, block_type, btype, rot):
         self.cv = cv
         self.cell_size = cell_size
+        self.marginy = marginy
         self.offset = 1
         self.posx = posx #ブロックの左上のx座標
         self.posy = posy #ブロックの左上のy座標
@@ -30,6 +31,8 @@ class Block():
         self.rotation_number = rot
         self.rot_types = [self.block_type, np.rot90(self.block_type, k=-1), np.rot90(self.block_type, k=2), np.rot90(self.block_type, k=1)]
         self.BLOCK = self.rot_types[rot]
+        index = np.where(self.BLOCK >= 1)
+        self.posy -= min(index[0])
         self.cv.bind_all('<Key-Left>', self.move_left)
         self.cv.bind_all('<Key-Right>', self.move_right)
         self.cv.bind_all('<Key-Down>', self.move_down)
@@ -43,81 +46,52 @@ class Block():
             y = index[0][i]
             sq = Square(self.cv, self.color, self.tag)
             x1 = (self.posx + x<<4) + self.offset
-            y1 = (self.posy + y<<4) + self.offset
+            y1 = (self.posy + y<<4) + self.offset - self.marginy
             x2 = x1 + self.cell_size
             y2 = y1 + self.cell_size
             sq.draw(x1, y1, x2, y2)
     
     #ブロックが落ちる
     def drop_down(self):
-        self.cv.delete(self.tag)
-        x = 0
-        y = 1
-        self.posx += x
-        self.posy += y
+        self.cv.delete(self.tag)       
+        self.posy += 1
         self.draw()
-    
+            
     #左に動かす
     def move_left(self, event):
         self.cv.delete(self.tag)
-        x = -1
-        y = 0
-        self.posx += x
-        self.posy += y
-        self.draw()
+        self.posx -= 1
         if self.is_overlapped():
-            self.cv.delete(self.tag)
-            x = 1
-            y = 0
-            self.posx += x
-            self.posy += y
-            self.draw()
+            self.posx += 1
+        self.draw()
                 
     #右に動かす
     def move_right(self, event):
         self.cv.delete(self.tag)
-        x = 1
-        y = 0
-        self.posx += x
-        self.posy += y
-        self.draw()
+        self.posx += 1
         if self.is_overlapped():
-            self.cv.delete(self.tag)
-            x = -1
-            y = 0
-            self.posx += x
-            self.posy += y
-            self.draw()
+            self.posx -= 1
+        self.draw()
                 
     #下に動かす
     def move_down(self, event):
         self.cv.delete(self.tag)
-        x = 0
-        y = 1
-        self.posx += x
-        self.posy += y
-        self.draw()
+        self.posy += 1
         if self.is_overlapped():
-            self.cv.delete(self.tag)
-            x = 0
-            y = -1
-            self.posx += x
-            self.posy += y
-            self.draw()
+            self.posy -= 1
+        self.draw()
             
     #回転させる
     def rotate(self, event):
         self.cv.delete(self.tag)
-        rot_num = (self.rotation_number+1) % 4
-        self.BLOCK = self.rot_types[rot_num]
-        self.draw()
         self.rotation_number += 1
+        rot_num = (self.rotation_number) % 4
+        self.BLOCK = self.rot_types[rot_num]       
         if self.is_overlapped():
-            self.cv.delete(self.tag)
             self.rotation_number -= 1
             rot_num = self.rotation_number % 4
             self.BLOCK = self.rot_types[rot_num]
-            self.draw()
+        self.draw()
 
     #ブロックが重なったかどうか
     def is_overlapped(self):
@@ -126,15 +100,11 @@ class Block():
             x = index[1][i]
             y = index[0][i]
             
-            if self.posy + y >= 0:
-                if self.posy + y >= FIELD.shape[0] - 3 \
-                or self.posx + x <= 0 \
-                or self.posx + x >= FIELD.shape[1] - 1 \
-                or FIELD[self.posy + y][self.posx + x] >= 1:
-                    return True
-            elif self.posx <= 0 \
-            or self.posx + x >= FIELD.shape[1] - 1:
-                    return True        
+            if self.posy + y >= FIELD.shape[0] - 1 \
+            or self.posx + x <= 0 \
+            or self.posx + x >= FIELD.shape[1] - 1 \
+            or FIELD[self.posy + y][self.posx + x] >= 1:
+                return True
         return False
 
     #ブロックをコピー
@@ -193,21 +163,21 @@ class Field():
     def draw_wall_base(self):
         color = 'white'
         #壁
-        for y in range(FIELD.shape[0] - 3):
+        for y in range(2, FIELD.shape[0] - 1):
             for x in [0, FIELD.shape[1] - 1]:
                 sq = Square(self.cv, color, tag='wall')
                 x1 = (x<<4) + self.offset
-                y1 = (y<<4) + self.offset + self.marginy
+                y1 = (y<<4) + self.offset - self.marginy
                 x2 = x1 + self.cell_size
                 y2 = y1 + self.cell_size
                 sq.draw(x1, y1, x2, y2)
          
         #底
-        y = FIELD.shape[0] - 3
+        y = FIELD.shape[0] - 1
         for x in range(FIELD.shape[1]):
             sq = Square(self.cv, color, tag='wall')
             x1 = (x<<4) + self.offset
-            y1 = (y<<4) + self.offset + self.marginy
+            y1 = (y<<4) + self.offset - self.marginy
             x2 = x1 + self.cell_size
             y2 = y1 + self.cell_size
             sq.draw(x1, y1, x2, y2)
@@ -226,13 +196,13 @@ class Field():
     def draw_field(self, tag):
         self.delete(tag) #積もったブロックを削除
 
-        for y in range(FIELD.shape[0] - 1):
+        for y in range(0, FIELD.shape[0] - 1):
             for x in range(1, FIELD.shape[1] - 1):
                 if FIELD[y, x] >= 1:
                     btype = FIELD[y, x]
                     sq = Square(self.cv, color=self.color_types[btype], tag='load')
                     x1 = (x<<4) + self.offset
-                    y1 = (y<<4) + self.offset + self.marginy
+                    y1 = (y<<4) + self.offset - self.marginy
                     x2 = x1 + self.cell_size
                     y2 = y1 + self.cell_size
                     sq.draw(x1, y1, x2, y2)
@@ -244,8 +214,8 @@ class Field():
             x = index[1][i]
             y = index[0][i]
             
-            if 0 <= posy + y <= FIELD.shape[0] - 2 \
-            and 1 <= posx + x <= FIELD.shape[1] - 2:
+            if 0 <= posy + y < FIELD.shape[0] - 1 \
+            and 1 <= posx + x < FIELD.shape[1] - 1:
                 FIELD[posy + y, posx + x] = cp_block[y, x]
         
     #行が全て埋まった段があるかどうか
@@ -386,7 +356,7 @@ btype = np.random.randint(1,8)
 block_type = blocks[btype]
 rot = np.random.randint(4)    
             
-block = Block(cv, cell_size, startx, starty, block_type, btype, rot)
+block = Block(cv, cell_size, marginy, startx, starty, block_type, btype, rot)
 block.draw()
 
 count = 0
@@ -396,15 +366,17 @@ gameover_count = 0
 
 #ゲームループ
 while True:
+    count += 1
+    
     if field.is_game_over():
         field.show_game_over()
         gameover_count += 1
         if gameover_count >= 2:
             break    
-    
+
     if block.is_overlapped():
-        cp_block = block.copy()
         block.posy -= 1
+        cp_block = block.copy()
         field.load_block(cp_block, block.posx, block.posy)
         field.draw_field(block.tag)
             
@@ -416,7 +388,7 @@ while True:
             
         if next_block != None:
             startx = np.random.randint(2, 7)
-            block = Block(cv, cell_size, startx, starty, next_block.block_type, next_block.btype, next_block.rot)
+            block = Block(cv, cell_size, marginy, startx, starty, next_block.block_type, next_block.btype, next_block.rot)
             block.draw()
             count = 0 #カウントをリセット
             
@@ -430,8 +402,6 @@ while True:
         if ntag != None:
             next_block.delete(ntag)
         ntag = next_block.draw() #NEXTブロックを描く
-    
-    count += 1
     
     tk.update_idletasks()
     tk.update()
