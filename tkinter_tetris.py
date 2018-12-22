@@ -37,6 +37,7 @@ class Block():
         self.cv.bind_all('<Key-Right>', self.move_right)
         self.cv.bind_all('<Key-Down>', self.move_down)
         self.cv.bind_all('<Key-Up>', self.rotate)
+        self.landed = False
         
     #ブロックを描く
     def draw(self):
@@ -55,12 +56,16 @@ class Block():
     def drop_down(self):
         self.cv.delete(self.tag)       
         self.posy += 1
+        if self.is_overlapped_with_base():
+            self.posy -= 1
+            self.landed = True
         self.draw()
             
     #左に動かす
     def move_left(self, event):
         self.cv.delete(self.tag)
-        self.posx -= 1
+        if not self.landed:
+            self.posx -= 1
         if self.is_overlapped():
             self.posx += 1
         self.draw()
@@ -68,7 +73,8 @@ class Block():
     #右に動かす
     def move_right(self, event):
         self.cv.delete(self.tag)
-        self.posx += 1
+        if not self.landed:
+            self.posx += 1
         if self.is_overlapped():
             self.posx -= 1
         self.draw()
@@ -76,7 +82,8 @@ class Block():
     #下に動かす
     def move_down(self, event):
         self.cv.delete(self.tag)
-        self.posy += 1
+        if not self.landed:
+            self.posy += 1
         if self.is_overlapped():
             self.posy -= 1
         self.draw()
@@ -84,9 +91,10 @@ class Block():
     #回転させる
     def rotate(self, event):
         self.cv.delete(self.tag)
-        self.rotation_number += 1
-        rot_num = (self.rotation_number) % 4
-        self.BLOCK = self.rot_types[rot_num]       
+        if not self.landed:
+            self.rotation_number += 1
+            rot_num = (self.rotation_number) % 4
+            self.BLOCK = self.rot_types[rot_num]       
         if self.is_overlapped():
             self.rotation_number -= 1
             rot_num = self.rotation_number % 4
@@ -107,6 +115,18 @@ class Block():
                 return True
         return False
 
+    #ブロックが底と重なったかどうか
+    def is_overlapped_with_base(self):
+        index = np.where(self.BLOCK >= 1)
+        for i in range(index[0].size):
+            x = index[1][i]
+            y = index[0][i]
+            
+            if 1 <= self.posx + x <= FIELD.shape[1] - 2 \
+            and FIELD[self.posy + y][self.posx + x] >= 1:
+                return True
+        return False
+    
     #ブロックをコピー
     def copy(self):
         cp_block = np.copy(self.BLOCK)
@@ -374,8 +394,7 @@ while True:
         if gameover_count >= 2:
             break    
 
-    if block.is_overlapped():
-        block.posy -= 1
+    if block.landed:
         cp_block = block.copy()
         field.load_block(cp_block, block.posx, block.posy)
         field.draw_field(block.tag)
@@ -390,7 +409,7 @@ while True:
             startx = np.random.randint(2, 7)
             block = Block(cv, cell_size, marginy, startx, starty, next_block.block_type, next_block.btype, next_block.rot)
             block.draw()
-            count = 0 #カウントをリセット
+            count = 1 #カウントをリセット
             
     if count % 20 == 0:
         block.drop_down()
