@@ -311,7 +311,6 @@ tk.update()
 bg_color = 'black'
 draw_background(cv, width + score_area, height + marginy, bg_color)
 
-global FIELD
 FIELD = np.array(
         [[8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8], 
          [8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8],
