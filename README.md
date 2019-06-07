@@ -1,1 +1,1 @@
-# tkinter_tetris.py - tkinterで作ったテトリス
+##### tkinter_tetris.py - tkinterで作ったテトリス
